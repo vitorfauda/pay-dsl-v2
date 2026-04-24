@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useCheckout, type AppliedCoupon } from '@/context/CheckoutContext';
-import { callEdgeFunction } from '@/lib/supabase';
+import { callEdgeFunction, SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 import { validateCPF, maskCPF, maskPhone, formatBRL } from '@/lib/utils';
-import { User, Mail, FileText, Phone, ArrowLeft, ArrowRight, Check, X, Tag, Sparkles, QrCode, MessageCircle } from 'lucide-react';
+import { User, Mail, FileText, Phone, ArrowLeft, ArrowRight, Check, X, Tag, QrCode, MessageCircle } from 'lucide-react';
 import { LoaderRing } from '@/components/LoaderRing';
 import { toast } from 'sonner';
 
@@ -17,10 +17,27 @@ export default function Checkout() {
 
   const [couponCode, setCouponCode] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
+  const [couponsEnabled, setCouponsEnabled] = useState(false);
 
   useEffect(() => {
     if (!selectedPlan) nav('/');
   }, [selectedPlan, nav]);
+
+  // Le flag coupons_enabled da app_config (public table via REST com anon key)
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/app_config?key=eq.coupons_enabled&select=value`, {
+          headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+        });
+        const data = await r.json();
+        const enabled = data?.[0]?.value === 'true';
+        setCouponsEnabled(enabled);
+        if (!enabled && coupon) setCoupon(null); // limpa se desabilitado
+      } catch { setCouponsEnabled(false); }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!selectedPlan) return null;
 
@@ -109,7 +126,7 @@ export default function Checkout() {
         amount: amountCents,
       });
 
-      nav('/pix');
+      nav(`/pix/${paymentId}`);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -158,36 +175,38 @@ export default function Checkout() {
             </div>
           </section>
 
-          {/* Cupom */}
-          <section className="holo-card p-6">
-            <h3 className="font-display font-bold mb-4 flex items-center gap-2"><Tag size={16} className="text-primary" /> Cupom de desconto</h3>
-            {coupon ? (
-              <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-primary/10 border border-primary/30">
-                <div>
-                  <div className="font-mono font-bold text-primary">{coupon.code}</div>
-                  <div className="text-xs text-primary/70">
-                    {coupon.discount_type === 'percent' ? `${coupon.discount_value}% off` : formatBRL(coupon.discount_cents)} aplicado
+          {/* Cupom (condicional via app_config.coupons_enabled) */}
+          {couponsEnabled && (
+            <section className="holo-card p-6">
+              <h3 className="font-display font-bold mb-4 flex items-center gap-2"><Tag size={16} className="text-primary" /> Cupom de desconto</h3>
+              {coupon ? (
+                <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-primary/10 border border-primary/30">
+                  <div>
+                    <div className="font-mono font-bold text-primary">{coupon.code}</div>
+                    <div className="text-xs text-primary/70">
+                      {coupon.discount_type === 'percent' ? `${coupon.discount_value}% off` : formatBRL(coupon.discount_cents)} aplicado
+                    </div>
                   </div>
+                  <button onClick={removeCoupon} className="p-2 rounded-lg hover:bg-white/10 text-text-muted hover:text-red-400">
+                    <X size={14} />
+                  </button>
                 </div>
-                <button onClick={removeCoupon} className="p-2 rounded-lg hover:bg-white/10 text-text-muted hover:text-red-400">
-                  <X size={14} />
-                </button>
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <input
-                  value={couponCode}
-                  onChange={e => setCouponCode(e.target.value.toUpperCase())}
-                  placeholder="Ex: DEV50"
-                  className="input-dsl font-mono uppercase"
-                  maxLength={30}
-                />
-                <button onClick={applyCoupon} disabled={couponLoading || !couponCode} className="cta-ghost !px-6 shrink-0 text-sm">
-                  {couponLoading ? <LoaderRing size={14} /> : 'Aplicar'}
-                </button>
-              </div>
-            )}
-          </section>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    value={couponCode}
+                    onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder="Ex: DEV50"
+                    className="input-dsl font-mono uppercase"
+                    maxLength={30}
+                  />
+                  <button onClick={applyCoupon} disabled={couponLoading || !couponCode} className="cta-ghost !px-6 shrink-0 text-sm">
+                    {couponLoading ? <LoaderRing size={14} /> : 'Aplicar'}
+                  </button>
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Botão só em mobile (em desktop tá no sidebar) */}
           <div className="lg:hidden">

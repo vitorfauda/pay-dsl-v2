@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useCheckout } from '@/context/CheckoutContext';
 import { callEdgeFunction, checkPaymentStatus } from '@/lib/supabase';
 import { copyToClipboard, formatBRL, maskPhone } from '@/lib/utils';
+import { getPlanById, PLANS } from '@/lib/plans';
 import {
   Copy, Check, PartyPopper, Key as KeyIcon, Download, BookOpen, Users as UsersIcon,
   AlertTriangle, MessageCircle, ArrowLeft, Save, X, Clock,
@@ -15,11 +16,13 @@ type Status = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
 export default function Pix() {
   const nav = useNavigate();
-  const { pixData, setPixData, selectedPlan, reset } = useCheckout();
+  const { paymentId: paramId } = useParams<{ paymentId?: string }>();
+  const { pixData, setPixData, selectedPlan, setSelectedPlan, reset } = useCheckout();
 
   const [status, setStatus] = useState<Status>('pending');
   const [copied, setCopied] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [restoring, setRestoring] = useState(false);
   const pollRef = useRef<number | null>(null);
 
   // WhatsApp fix banner
@@ -27,13 +30,62 @@ export default function Pix() {
   const [newPhone, setNewPhone] = useState('');
   const [savingPhone, setSavingPhone] = useState(false);
 
+  // Reidrata estado se url tem id mas context vazio ou com id diferente
   useEffect(() => {
-    if (!pixData) { nav('/'); return; }
-    if (pixData.whatsapp_valid === false) {
+    if (!paramId) {
+      // sem id na URL — se tem pixData no context, substitui URL
+      if (pixData?.payment_id) {
+        nav(`/pix/${pixData.payment_id}`, { replace: true });
+      } else {
+        nav('/');
+      }
+      return;
+    }
+
+    if (pixData && pixData.payment_id === paramId) return; // ja hidratado
+
+    // Precisa buscar do banco
+    setRestoring(true);
+    (async () => {
+      try {
+        const data = await callEdgeFunction<any>('get-pix-payment', { payment_id: paramId });
+        if (!data?.ok) throw new Error(data?.error || 'Pagamento nao encontrado');
+
+        // Acha o plan pelo code pra reconstruir selectedPlan
+        const plan = PLANS.find(p => p.code === data.plan_code) || null;
+        if (plan) setSelectedPlan(plan);
+
+        setPixData({
+          payment_id: String(data.payment_id),
+          qr_code_base64: data.qr_code_base64,
+          qr_code_text: data.qr_code_text,
+          expires_at: data.expires_at,
+          plan_code: data.plan_code,
+          phone: data.customer_phone,
+          amount: data.amount_cents,
+          whatsapp_valid: true, // assume valido na reidratacao
+        });
+
+        // Se ja foi pago no banco, vai direto pro sucesso
+        if (data.status === 'approved' || data.status === 'paid') {
+          setStatus('approved');
+        }
+      } catch (e) {
+        toast.error('Pagamento não encontrado ou expirou');
+        setTimeout(() => nav('/'), 1500);
+      } finally {
+        setRestoring(false);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paramId]);
+
+  useEffect(() => {
+    if (pixData?.whatsapp_valid === false) {
       setShowWaFix(true);
       setNewPhone(maskPhone(pixData.phone || ''));
     }
-  }, [pixData, nav]);
+  }, [pixData]);
 
   // Polling de status a cada 3s
   useEffect(() => {
@@ -72,7 +124,14 @@ export default function Pix() {
     return () => clearInterval(id);
   }, [pixData]);
 
-  if (!pixData) return null;
+  if (restoring || !pixData) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 py-20 min-h-[60vh] flex flex-col items-center justify-center">
+        <LoaderRing size={40} />
+        <p className="text-sm text-text-muted mt-4">Carregando seu pagamento...</p>
+      </div>
+    );
+  }
 
   const handleCopy = async () => {
     await copyToClipboard(pixData.qr_code_text);

@@ -27,6 +27,7 @@ export default function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/pix" element={<Pix />} />
+            <Route path="/pix/:paymentId" element={<Pix />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
