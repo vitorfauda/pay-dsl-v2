@@ -1,0 +1,186 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@layer base {
+  :root { color-scheme: dark; }
+  html, body, #root { min-height: 100%; background: #05070d; }
+  body {
+    @apply font-sans text-text-primary antialiased;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 0%, rgba(34,197,94,0.08), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 100%, rgba(34,211,238,0.06), transparent 60%),
+      #05070d;
+    background-attachment: fixed;
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  * { border-color: rgba(255,255,255,0.08); box-sizing: border-box; }
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', Inter, sans-serif; letter-spacing: -0.03em; margin: 0; }
+  p { margin: 0; }
+  .font-tabular { font-variant-numeric: tabular-nums; }
+
+  /* Evita scroll horizontal acidental em qualquer tela */
+  html, body { overflow-x: hidden; max-width: 100vw; }
+
+  /* Cells com break em palavra longa (URLs, chaves) */
+  td, th { word-break: break-word; }
+  @media (max-width: 640px) {
+    ::-webkit-scrollbar { width: 0; height: 4px; }
+  }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #0a0f1a; }
+  ::-webkit-scrollbar-thumb { background: rgba(34,197,94,0.3); border-radius: 8px; border: 2px solid #0a0f1a; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(34,197,94,0.5); }
+  ::selection { background: rgba(34,197,94,0.3); color: #f8fafc; }
+}
+
+@layer components {
+  .holo-card {
+    @apply relative overflow-hidden rounded-2xl border backdrop-blur-xl transition-all duration-500;
+    background: rgba(17, 24, 38, 0.5);
+    border-color: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .holo-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(from var(--angle, 0deg), transparent 0%, #22c55e 20%, #22d3ee 30%, transparent 50%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    animation: rotate-border 5s linear infinite;
+    pointer-events: none;
+  }
+  .holo-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(34,197,94,0.3);
+    box-shadow: 0 24px 60px -10px rgba(16, 248, 144, 0.15);
+  }
+  .holo-card:hover::before { opacity: 1; }
+  .holo-card.holo-permanent::before { opacity: 0.8; }
+
+  @keyframes rotate-border { to { --angle: 360deg; } }
+
+  .cta-neon {
+    @apply relative overflow-hidden rounded-2xl px-7 py-3.5 font-semibold text-white transition-all duration-300;
+    background: linear-gradient(135deg, #22c55e, #10b981);
+    box-shadow: 0 0 0 1px rgba(34,197,94,0.4), 0 12px 40px -8px rgba(34,197,94,0.55), inset 0 1px 0 rgba(255,255,255,0.2);
+    text-shadow: 0 0 20px rgba(255,255,255,0.3);
+    border: 0;
+    cursor: pointer;
+  }
+  .cta-neon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+  .cta-neon:hover { transform: translateY(-2px) scale(1.02); }
+  .cta-neon:hover::after { transform: translateX(100%); }
+  .cta-neon:active { transform: translateY(0) scale(1); }
+  .cta-neon:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .cta-ghost {
+    @apply rounded-2xl px-6 py-3.5 font-medium text-text-primary border transition-all duration-300;
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.1);
+    cursor: pointer;
+  }
+  .cta-ghost:hover {
+    background: rgba(34,197,94,0.08);
+    border-color: rgba(34,197,94,0.3);
+    transform: translateY(-1px);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #22c55e 0%, #22d3ee 50%, #d946ef 100%);
+    -webkit-background-clip: text;
+            background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .badge-pulse {
+    @apply inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold;
+    background: rgba(34,197,94,0.12);
+    border: 1px solid rgba(34,197,94,0.3);
+    color: #22c55e;
+  }
+  .badge-pulse::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(34,197,94,0.7);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+    50% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .mesh-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @media (max-width: 640px) {
+    .mesh-blob { filter: blur(80px); opacity: 0.12; }
+  }
+
+  /* Utilidade pra padding de seção responsivo */
+  .section-pad { @apply py-14 sm:py-20 md:py-24; }
+
+  /* Wrapper de tabela que scrolla com indicador sutil em mobile */
+  .table-wrap { @apply overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0; }
+
+  .input-dsl {
+    @apply w-full rounded-xl border bg-transparent px-4 py-3 text-text-primary placeholder:text-text-dim transition-all duration-300;
+    border-color: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.02);
+  }
+  .input-dsl:focus {
+    outline: none;
+    border-color: rgba(34,197,94,0.5);
+    background: rgba(34,197,94,0.03);
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+  }
+  .input-dsl.error {
+    border-color: rgba(239,68,68,0.5);
+    background: rgba(239,68,68,0.03);
+  }
+}

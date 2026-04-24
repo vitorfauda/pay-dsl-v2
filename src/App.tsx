@@ -1,0 +1,36 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import { CheckoutProvider } from '@/context/CheckoutContext';
+import { Layout } from '@/components/Layout';
+import Landing from '@/pages/Landing';
+import Checkout from '@/pages/Checkout';
+import Pix from '@/pages/Pix';
+import NotFound from '@/pages/NotFound';
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <CheckoutProvider>
+        <Toaster
+          position="top-right"
+          theme="dark"
+          toastOptions={{
+            style: {
+              background: '#0a0f1a',
+              border: '1px solid rgba(34,197,94,0.2)',
+              color: '#f8fafc',
+            },
+          }}
+        />
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Landing />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/pix" element={<Pix />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </CheckoutProvider>
+    </BrowserRouter>
+  );
+}
