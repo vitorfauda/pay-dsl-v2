@@ -7,8 +7,8 @@ export function Header() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2 font-display font-bold">
           <div className="relative">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent-cyan flex items-center justify-center shadow-lg shadow-primary/40">
-              <span className="text-void font-black text-sm">D</span>
+            <div className="h-8 w-8 rounded-lg overflow-hidden">
+              <img src="/logo.png" alt="DSL" className="h-full w-full object-contain" />
             </div>
             <div className="absolute inset-0 rounded-lg bg-primary/30 blur-md -z-10" />
           </div>
