@@ -1,24 +1,21 @@
 import { Link } from 'react-router-dom';
-import { ShieldCheck } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b backdrop-blur-xl" style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(5,7,13,0.75)' }}>
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2 font-display font-bold">
-          <div className="relative">
-            <div className="h-8 w-8 rounded-lg overflow-hidden">
-              <img src="/logo.png" alt="DSL" className="h-full w-full object-contain" />
-            </div>
-            <div className="absolute inset-0 rounded-lg bg-primary/30 blur-md -z-10" />
+    <header className="sticky top-0 z-30 backdrop-blur-md bg-[var(--color-bg)]/80 border-b border-[var(--color-border)]">
+      <div className="max-w-[1100px] mx-auto px-6 h-14 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="h-7 w-7 rounded-md overflow-hidden">
+            <img src="/logo.png" alt="DSL" className="h-full w-full object-contain" />
           </div>
-          <span className="text-text-primary text-base sm:text-lg">Dev Sem Limites</span>
+          <span className="font-semibold tracking-tight">Dev Sem Limites</span>
         </Link>
 
-        <div className="flex items-center gap-2 text-xs sm:text-sm">
-          <ShieldCheck size={14} className="text-primary" />
-          <span className="hidden sm:inline text-text-muted">Pagamento seguro</span>
-          <span className="sm:hidden text-text-muted">Seguro</span>
+        <div className="flex items-center gap-2 text-xs text-[var(--color-text-dim)]">
+          <Lock size={12} />
+          <span className="hidden sm:inline">Pagamento criptografado</span>
+          <span className="sm:hidden">Seguro</span>
         </div>
       </div>
     </header>
