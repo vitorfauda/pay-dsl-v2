@@ -5,10 +5,9 @@ import { WhatsAppFloat } from './WhatsAppFloat';
 
 export function Layout() {
   return (
-    <div className="relative min-h-screen flex flex-col">
-      <div className="grain" />
+    <div className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-text)]">
       <Header />
-      <main className="flex-1 relative z-[2]">
+      <main className="flex-1">
         <Outlet />
       </main>
       <Footer />
