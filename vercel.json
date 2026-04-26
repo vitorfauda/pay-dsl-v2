@@ -14,7 +14,7 @@
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(self)" },
         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://sdk.mercadopago.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://qtbkvshbmqlszncxlcuc.supabase.co https://api.mercadopago.com https://sdk.mercadopago.com https://api.pagar.me; frame-src https://sdk.mercadopago.com; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'" }
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://sdk.mercadopago.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://qtbkvshbmqlszncxlcuc.supabase.co https://api.mercadopago.com https://sdk.mercadopago.com https://api.pagar.me https://viacep.com.br; frame-src https://sdk.mercadopago.com; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'" }
       ]
     }
   ]
